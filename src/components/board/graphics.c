@@ -128,7 +128,7 @@ int	theScreenWidth;
 			break;
 	}
 #else
-	theScreenWidth	=	kSCREEN_X_size;
+	theScreenWidth  =       kSCREEN_X_size;
 #endif
 
 	return(theScreenWidth);

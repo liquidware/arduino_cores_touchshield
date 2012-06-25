@@ -52,66 +52,7 @@ static unsigned int
 touchscreen_stealth_process_x(unsigned int adc_value)
 {
   unsigned int x_loc = ADCH; //save the ADC result
-#if 0
 
-  if (x_loc > 15) //The natural idle value of the touch screens is about 2 for the x and 2 for the y
-  //when there as been a press greater than 15 it is on the region of the screen (assuming the y also has a press greater than 15)
-  {
-    sample_count++; //this keeps track of how many samples the processor took durring a press
-    if (x_loc > x_loc_max)//here we look for the max x value durring a press (based on the max of all the sample counts)
-    { //save the new maximums
-      x_loc_max = x_loc;//save the new maximum x
-      y_loc_max = y_loc;//save the previous y
-    }
-    if (sample_count > 10000) //40,000 samples
-    {
-      eeprom_write_byte ((unsigned char*) ee_isCalibrated, 23);
-      //eeprom_write_byte(50, 23);
-
-      //lcd_clear();
-      COLOR c =
-      {
-        255,
-        0,
-        0};
-      COLOR blk =
-      {
-        0,
-        0,
-        0};
-      lcd_clearScreen (blk);
-      char msg[40];
-      strncpy_P (msg, PSTR ("Touchscreen Reset."), 40);
-      dispPutS (msg, 0, 50, c, blk);
-
-      strncpy_P (msg, PSTR ("Please powercycle"), 40);
-      dispPutS (msg, 0, 60, c, blk);
-      while (1) {
-        ;
-      }
-
-    }
-
-  } else // there wasn't a press because the screen was still in an idle state
-  {
-    //idle
-    if (x_loc_max <= 15)//not just pressed because x_loc_max would have a value of16 or greater from above
-    {
-    } else //this sample is the first sample after a touch took place
-    {
-      if (sample_count > 30) //makes sure the press is greater than 80 samples long (shorter press's are usually triggered by noise or other errors)
-      {
-        xx_loc = x_loc_max; //save the most recent touch screen x sample
-        yy_loc = y_loc_max;//save the most recent touch screen y sample
-        x_loc_max = 0;//reinitialize the program to be ready to sample again
-        y_loc_max = 0;//reinitialize the program to be ready to sample again
-        sample_count = 0;//reinitialize the program to be ready to sample again
-        press = yes;//flag the pressed status from   no -> yes
-
-      }
-    }
-  }
-#endif
   return x_loc;
 } //end
 
