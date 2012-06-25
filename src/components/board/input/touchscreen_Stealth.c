@@ -20,9 +20,7 @@
 #include	"HardwareDef.h"
 
 #include	"touchscreen.h"
-#ifdef _TOUCH_STEALTH_
-//#include "oled_stealth.h"
-#endif
+
 #include	"bitops.h"
 #include	"calibrate.h"
 #include	"usart.h"
@@ -30,22 +28,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#if 0
-volatile unsigned char press;
-volatile unsigned char x_loc;
-volatile unsigned char y_loc;
-unsigned char yy_loc, xx_loc;
-volatile unsigned char x_loc_max, y_loc_max;
-volatile unsigned int sample_count;
-
-MATRIX matrix;
-
-#define ee_isCalibrated 28
-#define ee_matrix 0
-//EEMEM unsigned char ee_isCalibrated;
-//EEMEM MATRIX ee_matrix;
 #endif
 
 static unsigned int
