@@ -77,11 +77,7 @@ hx8347_status(void)
 static void
 hx8347_brightness(unsigned char brightnessLevel)
 {
-
-  /* Range Check Brightness */
-  if (brightnessLevel < BRIGHT_MAX) {
-
-  }
+  OCR0B = 255 - brightnessLevel;
 }
 
 //*******************************************************************************
@@ -260,6 +256,10 @@ hx8347_setup_pins(void)
   //LED backlight
   SETBIT(LCD_VLED_A_DDR, LCD_VLED_A_PIN);
   CLRBIT(LCD_VLED_A_PORT, LCD_VLED_A_PIN);
+
+  TCCR0A |= (1 << COM0B1) | (0 << COM0B0) | (0 << WGM01) | (1 << WGM00);
+  TCCR0B |= (0 << WGM02);
+  hx8347_brightness(255);
 
   SETBIT(LCD_DNC_SCL_DDR, LCD_DNC_SCL_PIN);
 }
