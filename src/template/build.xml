@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+<!--
+   ANT Buildfile - Builds the Arduino for Arduino
+   Copyright (C) 2010 Christopher Ladden, Omar Ayub  All rights reserved.
+
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this library; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
+   USA
+-->
+<project default="build.all">
+
+    <!--
+        ===================================================================
+         Set the properties related to the target we're compiling.
+        ===================================================================
+    -->
+    <basename property="base.name"       file="${basedir}" />
+    <property name="source.path"         value="${build.dest}/tmp/${sketch.name}"/>
+    <property name="base.dir"            value="../../"/>
+    <property name="include.board.path"  value="${base.dir}/src/components/board"/>
+
+    <!--
+        ===================================================================
+         Set the properties related to the Build area
+        ===================================================================
+    -->
+    <property name="lib.path"     value="${build.dest}/targets/${target.name}/lib"/>
+    <property name="obj.path"     value="${build.dest}/targets/${target.name}/build/sketch"/>
+    <property name="bin.path"     value="${build.dest}/tmp/${sketch.name}"/>
+
+    <!--
+        ===================================================================
+         Build Tasks
+        ===================================================================
+    -->
+    <target name="build.all" depends="compile.all, linker.all, hex.hexify"/>
+    <target name="compile.all" depends="clean, prepare, compile.sources"/>
+    <target name="linker.all" depends="linker.link"/>
+
+    <!--
+        ===================================================================
+         Clean - clean the build
+        ===================================================================
+    -->
+
+    <target name="clean">
+        <!-- Do nothing -->
+    </target>
+
+    <!--
+        ===================================================================
+         Prepare - create build directories and grab files/folders
+        ===================================================================
+    -->
+    <target name="prepare">
+
+        <!-- Get a copy of the sketch-wrapper -->
+        <copy tofile="${tmp.path}/${sketch.name}/sketch-wrapper.cpp" file="${base.dir}/src/template/sketch-wrapper.cpp.tmpl"/>
+
+        <!-- Tell the sketch wrapper to include the sketch by name -->
+        <echo file="${tmp.path}/${sketch.name}/sketch-wrapper.cpp"
+              append="true"
+              message="#include &quot;${sketch.name}.pde&quot;"/>
+
+        <!-- Find all source files in the base directory
+             and move them into the tmp directory -->
+        <move todir="${tmp.path}/${sketch.name}">
+            <fileset dir="${tmp.path}">
+                <include name="*.S" />
+                <include name="*.c" />
+                <include name="*.cpp" />
+                <include name="*.h" />
+            </fileset>
+        </move>
+
+        <!-- Use the sketch template in the first run from the command line -->
+        <copy file="${base.dir}/src/template/sketch.pde.tmpl" tofile="${tmp.path}/${sketch.name}/${sketch.name}.pde" />
+
+        <!-- Copy the IDE generated sketch file to a known name
+             so the sketch-wrapper can include it -->
+        <move file="${build.dest}/${sketch.name}.cpp" tofile="${tmp.path}/${sketch.name}/${sketch.name}.pde"/>
+
+        <!-- Create the folder for the sketch .o files -->
+        <mkdir dir="${obj.path}" />
+    </target>
+
+    <!--
+        ===================================================================
+         Compile - compile the sketch sources
+        ===================================================================
+    -->
+
+    <target name="compile.sources">
+        <property name="include.dirs"
+                  value="-I&quot;${include.board.path}&quot;
+                         -I&quot;${include.lib.core.dirs}&quot;
+                         -I&quot;${include.lib.user.dirs}&quot;
+                         -I&quot;${tmp.path}/${sketch.name}&quot;"/>
+
+        <!-- Compile sketch .c sources --> <!-- remove the include argument? -->
+        <cc name="${cross.gcc}" dest="*.o" destdir="${obj.path}" force="true"
+            include="**/*.c"
+            src="*.c" srcdir="${source.path}"
+            args="${cross.opts} ${cross.cflags}
+                  ${include.dirs}
+                  -c" />
+
+        <!-- Compile sketch .cpp sources --> <!-- remove the include argument? -->
+        <cc name="${cross.gpp}" dest="*.o" destdir="${obj.path}" force="true"
+            include="**/*.cpp"
+            src="*.cpp" srcdir="${source.path}"
+            args="${cross.opts} ${cross.cppflags}
+                  ${include.dirs}
+                  -c" />
+
+        <!-- Create the sketch archive -->
+        <ar name="${cross.ar}" to="${lib.path}/libsketch.a" dir="${obj.path}" includes="*.o" />
+    </target>
+
+    <!--
+        ===================================================================
+         Link - Link the sketch object with the board and library objects
+        ===================================================================
+    -->
+
+    <target name="linker.link">
+
+        <property name="linker.args"
+                  value="&quot;${obj.path}/sketch-wrapper.o&quot;
+                         ${cross.ldflags}
+                         -L &quot;${lib.path}&quot;
+                         -lcontrib
+                         -lsketch
+                         -lhw
+                         -lm
+                         -o"/>
+
+        <!-- ELF Output for debugging -->
+        <run name="${cross.gcc}"
+              args="${linker.args}
+                    &quot;${obj.path}/sketch.elf&quot;
+                    &quot;-Wl,-Map=${bin.path}/sketch.map,--cref&quot;
+                    "/>
+
+        <!-- Binary Output for hex file creation -->
+        <run name="${cross.gcc}"
+              args="${linker.args}
+                    &quot;${obj.path}/sketch&quot;"/>
+
+    </target>
+
+    <target name="hex.hexify">
+        <objcopy name="${cross.objcopy}"
+                 args="--strip-unneeded -O ihex"
+                 src="${obj.path}/sketch" dest="${bin.path}/sketch.hex"/>
+    </target>
+
+    <target name="size.all">
+        <size name="${cross.size}" args="" file="${bin.path}/sketch.hex" />
+    </target>
+
+    <target name="upload.all">
+
+        <run name="${upload.avrdude}" args="-C ${upload.avrdude.conf}
+                                            -v -p ${upload.avrdude.cpu}
+                                            -c ${upload.avrdude.protocol} -P ${upload.port}
+                                            -b ${upload.avrdude.baud}
+                                            -U flash:w:${bin.path}/sketch.hex:i" />
+    </target>
+
+</project>

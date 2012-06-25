@@ -1,0 +1,154 @@
+<?xml version="1.0"?>
+<!--
+   ANT Buildfile - Builds the Arduino for Arduino
+   Copyright (C) 2009 Christopher Ladden, Omar Ayub  All rights reserved.
+
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this library; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
+   USA
+-->
+<project default="build.all">
+
+    <!--
+        ===================================================================
+         Load the project's resources (ANT libraries)
+        ===================================================================
+    -->
+    <typedef resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+             <pathelement location="../ixm/tools/apache-ant/library/ant-contrib/ant-contrib-1.0b3.jar" />
+        </classpath>
+    </typedef>
+
+    <!--
+        ===================================================================
+         Load the project's properties
+        ===================================================================
+    -->
+    <import file="config/build.properties.xml" />
+
+    <!--
+        ===================================================================
+         Load helper macros
+        ===================================================================
+    -->
+    <import file="config/build.ccmacros.xml" />
+
+    <!--
+        ===================================================================
+         Build Tasks - How we build this directory
+        ===================================================================
+    -->
+    <target name="build.all"  depends="build.body"/>
+    <target name="build.body" depends="set.body, find.libraries, build.libraries, build.board.src, build.sketch, size.sketch"/>
+    <target name="build.bootloader" depends="set.body, build.libraries, build.board.src, build.bios"/>
+
+    <target name="size.all"   depends="size.sketch"/>
+    <target name="upload.all" depends="upload.sketch"/>
+    <target name="upload.bootloader" depends="build.bootloader, upload.bios"/>
+
+
+    <target name="clean.all">
+        <!-- Just delete the entire build directory. -->
+        <delete dir="${build.dest}/targets"/>
+        <delete failonerror = "false">
+             <fileset dir="${build.dest}/tmp" includes="**/*.*"/>
+        </delete>
+    </target>
+
+    <target name="set.body">
+        <property name="target" value="body"/>
+    </target>
+    <target name="set.host">
+        <property name="target" value="host"/>
+    </target>
+
+    <!--
+        ===================================================================
+         Find Libraries - Find the core and user libraries
+        ===================================================================
+    -->
+
+    <target name="find.libraries">
+        <property name="core.lib.dir" value="./src/components/libraries"/>
+        <property name="user.lib.dir" value="${user.home}/Arduino/libraries"/>
+
+        <!-- Create the user library folder if it doesn't exist -->
+        <mkdir dir="${user.lib.dir}/Template"/>
+
+        <!-- Create a pattern to match directies with source files -->
+        <patternset id="source.file.dirs">
+            <include name="**/*"/>
+            <exclude name="**/examples/**"/>
+            <exclude name="**/reference/**"/>
+        </patternset>
+
+        <!-- Recursively find the core library directories -->
+        <dirset dir="${core.lib.dir}" id="lib.core.dirs">
+            <patternset refid="source.file.dirs"/>
+        </dirset>
+
+        <!-- Recursively find the user library directories -->
+        <dirset dir="${user.lib.dir}" id="lib.user.dirs">
+            <patternset refid="source.file.dirs"/>
+        </dirset>
+
+        <!-- A trick to format the library include
+            as -I//some/path -I//another/path for the GCC compiler -->
+        <pathconvert pathsep="&quot; -I&quot;" property="include.lib.core.dirs" refid="lib.core.dirs"/>
+        <pathconvert pathsep="&quot; -I&quot;" property="include.lib.user.dirs" refid="lib.user.dirs"/>
+
+        <!-- Copy the library directory structures to the build folder -->
+        <copy todir="${build.dest}/targets/body/build">
+        <dirset refid="lib.core.dirs"/>
+        <dirset refid="lib.user.dirs"/>
+    </copy>
+    </target>
+
+    <target name="build.libraries">
+         <echo message="Building ${board.name} libraries..."/>
+        <ant dir="src/components/libraries" target="build.all" />
+    </target>
+
+    <target name="build.bios">
+        <echo message="Building ${board.name} bootloader target..."/>
+        <ant dir="src/components/bios"    target="build.all"/>
+    </target>
+
+    <target name="build.board.src">
+        <echo message="Building ${board.name} board target..."/>
+        <ant dir="src/components/board"   target="build.all" />
+    </target>
+
+    <target name="build.sketch">
+        <echo message="Building ${sketch.name} for the ${board.name} core..."/>
+        <ant dir="src/template"    target="build.all" />
+            </target>
+
+    <target name="size.sketch">
+        <echo message="Calculating ${sketch.name} size..."/>
+        <ant dir="src/template"    target="size.all" />
+    </target>
+
+    <target name="upload.bios">
+        <echo message="Uploading bios to board..."/>
+        <ant dir="src/components/bios"  target="upload.all" />
+    </target>
+
+    <target name="upload.sketch">
+        <echo message="Uploading ${sketch.name} to board..."/>
+        <ant dir="src/template"         target="upload.all" />
+    </target>
+
+</project>

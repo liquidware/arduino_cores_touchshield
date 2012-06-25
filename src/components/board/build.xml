@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<!--
+   ANT Buildfile - Builds the Arduino for Arduino
+   Copyright (C) 2010 Christopher Ladden, Omar Ayub  All rights reserved.
+
+   This library is free software; you can redistribute it and/or
+   modify it under the terms of the GNU Lesser General Public
+   License as published by the Free Software Foundation; either
+   version 2.1 of the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this library; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301
+   USA
+-->
+<project default="build.all">
+
+    <!--
+        ===================================================================
+         Set the properties related to the target we're compiling
+        ===================================================================
+    -->
+
+    <basename property="base.name"      file="${basedir}" />
+    <property name="source.path"        value="."/>
+    <property name="base.dir"           value="../../.."/>
+    <property name="include.board.path" value="${base.dir}/src/components/board"/>
+
+    <!--
+        ===================================================================
+         Set the properties related to the Build area
+        ===================================================================
+    -->
+    <property name="obj.base"     value="${build.dest}/targets/${target.name}/build" />
+    <property name="bin.path"     value="${build.dest}/targets/${target.name}/bin"/>
+    <property name="lib.path"     value="${build.dest}/targets/${target.name}/lib"/>
+    <property name="obj.path"     value="${obj.base}/${base.name}"/>
+
+    <!--
+        ===================================================================
+         Build Tasks
+        ===================================================================
+    -->
+
+    <target name="build.all" depends="compile.all"/>
+    <target name="compile.all" depends="clean,
+                                        prepare,
+                                        compile.sources"/>
+
+    <!--
+        ===================================================================
+         Clean - clean the build
+        ===================================================================
+    -->
+
+    <target name="clean">
+        <!-- Do nothing -->
+    </target>
+
+    <!--
+        ===================================================================
+         Prepare - create build directories and grab folders
+        ===================================================================
+    -->
+
+    <target name="prepare">
+        <mkdir dir="${obj.path}"/>
+        <mkdir dir="${bin.path}"/>
+        <mkdir dir="${lib.path}"/>
+        <mkdir dir="${tmp.path}"/>
+    </target>
+
+    <!--
+        ===================================================================
+         Compile - compile the core and user source files
+        ===================================================================
+    -->
+
+    <target name="compile.sources">
+        <property name="include.dirs"
+                  value="-I&quot;${include.board.path}&quot;"/>
+        
+        <!-- Recreate the folder structure -->
+        <copy todir="${obj.path}" >
+            <fileset dir="${source.path}" >
+                <exclude name="**/*.*" />
+            </fileset>
+        </copy>
+        
+        <!-- Compile core .c sources -->
+        <cc name="${cross.gcc}" dest="*.o" destdir="${obj.path}"
+            include="**/*.c"
+            src="*.c" srcdir="${source.path}"
+            args="${cross.opts} ${cross.cflags}
+                  ${include.dirs}
+                  -c" />
+
+        <!-- Compile core .cpp sources -->
+        <cc name="${cross.gpp}" dest="*.o" destdir="${obj.path}"
+            include="**/*.cpp"
+            src="*.cpp" srcdir="${source.path}"
+            args="${cross.opts} ${cross.cppflags}
+                  ${include.dirs}
+                  -c" />
+
+        <!-- Archive the compiled objects -->
+        <ar name="${cross.ar}" to="${lib.path}/libhw.a"
+            dir="${obj.path}" includes="**/*.o" />
+
+        <!-- Copy the Libraries to the lib folder -->
+        <copy todir="${lib.path}" file="${obj.path}/main.o"/>
+    </target>
+</project>
