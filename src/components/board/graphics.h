@@ -58,23 +58,8 @@ void	dispPix();
 void	dispPowerLCD(uint8_t bOn);
 void	dispStandby(uint8_t bStandby);
 
-
-#ifdef _TOUCH_SLIDE_
-	//*	added by Mark Sproul Dec 2009
-	int		GetScreenWidth(void);
-	int		GetScreenHeight(void);
-
-	//*	THW clipping should only be needed for the touchSlide
-//	#define	_ENABLE_CLIPPING_
-	//*	THW scroll only works on the touchSlide
-//	#define	_ENABLE_HARDWARE_SCROLL_
-
-#elif defined(_TOUCH_STEALTH_)
-	#define	GetScreenWidth()	128
-	#define	GetScreenHeight()	128
-#else
-	#error invalid screen type
-#endif
+int             GetScreenWidth(void);
+int             GetScreenHeight(void);
 
 
 #ifdef _ENABLE_SCREEN_ROTATION_

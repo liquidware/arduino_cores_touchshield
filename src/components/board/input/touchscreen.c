@@ -9,12 +9,12 @@
 #include "bitops.h"
 
 #ifdef _TOUCH_SLIDE_
-extern struct touchscreen_device touchscreen_slide_driver;
-struct touchscreen_device *touchscreen = &touchscreen_slide_driver;
+  extern struct touchscreen_device touchscreen_slide_driver;
+  struct touchscreen_device *touchscreen = &touchscreen_slide_driver;
 #endif
 #ifdef _TOUCH_STEALTH_
-extern struct touchscreen_device touchscreen_stealth;
-struct touchscreen_device *touchscreen = &touchscreen_stealth;
+  extern struct touchscreen_device touchscreen_stealth;
+  struct touchscreen_device *touchscreen = &touchscreen_stealth;
 #endif
 
 #define SAMPLE_CNT_MAX  1

@@ -21,7 +21,7 @@
 
 #include	"touchscreen.h"
 #ifdef _TOUCH_STEALTH_
-#include "oled_stealth.h"
+//#include "oled_stealth.h"
 #endif
 #include	"bitops.h"
 #include	"calibrate.h"
@@ -450,7 +450,7 @@ touchscreen_stealth_disable(void)
 {
 }
 
-struct touchscreen_device touchscreen_slide =
+struct touchscreen_device touchscreen_stealth =
   {
 
       .init = touchscreen_stealth_init,

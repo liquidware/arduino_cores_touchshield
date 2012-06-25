@@ -117,7 +117,40 @@
 	#define PL6 6
 	#define PL7 7
 #endif	//	_TOUCH_SLIDE_
+#ifdef _TOUCH_STEALTH_
 
+        #define PL0 0
+        #define PL1 1
+        #define PL2 2
+        #define PL3 3
+        #define PL4 4
+        #define PL5 5
+        #define PL6 6
+        #define PL7 7
+
+        #define PORTH   PORTA
+        #define DDRH    PORTA
+        #define PINH    PORTA
+
+        #define PORTJ   PORTA
+        #define DDRJ    DDRA
+        #define PINJ    PINA
+
+
+        #define PORTL   PORTA
+        #define DDRL    DDRA
+        #define PINL    DDRA
+
+        #define TCCR0B  TCCR0A
+        #define OCR0B   OCR0A
+
+        #define COM0B0  0
+        #define COM0B1  0
+
+        #define WGM00   0
+        #define WGM01   0
+        #define WGM02   0
+#endif  //      _TOUCH_STEALTH_
 #endif
 
 

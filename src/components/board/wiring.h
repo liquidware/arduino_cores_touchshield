@@ -49,9 +49,6 @@
 #include        "display.h"
 #include        "platform.h"
 
-
-#define MILLISECOND_CNT_MAX	7 	//8*128uS = 1.024 mS
-
 #define HIGH 0x1
 #define LOW  0x0
 

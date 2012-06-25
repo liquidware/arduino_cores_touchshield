@@ -26,6 +26,12 @@
 #include "wiring_private.h"
 #include "usart.h"
 
+#define RX_PIN                                  PE5
+#define TX_PIN                                  PE6
+#define RXTX_PIN                                PINE
+#define RXTX_DDR                                DDRE
+#define RXTX_PORT                               PORTE
+
 void beginSerial(unsigned long baud)
 {
 	//disable hardware UART
