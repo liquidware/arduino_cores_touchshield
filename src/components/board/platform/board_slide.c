@@ -158,14 +158,35 @@ slide_arduino_reset()
   //arduino in reset
 }
 
+enum {
+  TOUCHSHIELD_SLIDE_REVA = 3,
+  TOUCHSHIELD_SLIDE_REVB = 0,
+};
+
+unsigned char
+touchshield_get_revision(void)
+{
+  DDRG &= (0 << PG0) | (0 << PG1) | (0 << PG2); //input
+  PORTG |= (1 << PG0) | (1 << PG1) | (1 << PG2); //pullups
+
+  delay_ms(5);
+
+  return (PING & 0x03);
+}
+
 //*******************************************************************************
 void
 slide_init()
 {
-  //Init I/O
-  //SETBIT(ARDUINO_RESET_PORT, ARDUINO_RESET_PNUM);
+  extern struct display_device hx8347_driver;
+  extern struct display_device oled28_driver;
 
+  if (touchshield_get_revision () == TOUCHSHIELD_SLIDE_REVA)
+    display = &oled28_driver;
+  else
+    display = &hx8347_driver;
   display->init ();
+
   dataflash_init ();
   touchscreen->init ();
   touchscreen_service_init();
