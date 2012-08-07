@@ -15,6 +15,8 @@
 #include	"binary.h"
 #include	"graphics.h"
 
+#undef DEBUG
+
 #define LCD_DNC_SCL_PORT PORTD
 #define LCD_DNC_SCL_DDR  DDRD
 #define LCD_DNC_SCL_PIN  PD0
@@ -22,11 +24,10 @@
 static inline void
 hx8347_command(unsigned char cmd)
 {
-
   //CLRBIT(OLED_CTRL_PORT,OLED_DC);
   CLRBIT(LCD_DNC_SCL_PORT, LCD_DNC_SCL_PIN);
   CLRBIT(OLED_CTRL_PORT, OLED_CS);
-  SETBIT(OLED_CTRL_PORT, OLED_RD);
+//  SETBIT(OLED_CTRL_PORT, OLED_RD);
   CLRBIT(OLED_CTRL_PORT, OLED_WR);
 
   OLED_DATA_LOW = (cmd << 2);
@@ -35,18 +36,16 @@ hx8347_command(unsigned char cmd)
 
   SETBIT(OLED_CTRL_PORT, OLED_WR);
 //  SETBIT(OLED_CTRL_PORT, OLED_CS);
-  //SETBIT(OLED_CTRL_PORT,OLED_DC);
+//  SETBIT(OLED_CTRL_PORT,OLED_DC);
 }
 
 static inline void
 hx8347_data(unsigned char data)
 {
-//  volatile unsigned char lb = (unsigned char) data;
-//  volatile unsigned char hb = (unsigned char) (data >> 8);
 
   //SETBIT(OLED_CTRL_PORT,OLED_DC);
   SETBIT(LCD_DNC_SCL_PORT, LCD_DNC_SCL_PIN);
-  CLRBIT(OLED_CTRL_PORT, OLED_CS);
+//  CLRBIT(OLED_CTRL_PORT, OLED_CS);
   // SETBIT(OLED_CTRL_PORT,OLED_RD);
   CLRBIT(OLED_CTRL_PORT, OLED_WR);
 
@@ -55,7 +54,7 @@ hx8347_data(unsigned char data)
 //  OLED_DATA_HIGH = 0;
 
   SETBIT(OLED_CTRL_PORT, OLED_WR);
- // SETBIT(OLED_CTRL_PORT, OLED_CS);
+//  SETBIT(OLED_CTRL_PORT, OLED_CS);
   // SETBIT(OLED_CTRL_PORT,OLED_DC);
 }
 
@@ -88,9 +87,9 @@ hx8347_pixel(void)
 //  CLRBIT(OLED_CTRL_PORT,OLED_CS);
   CLRBIT(OLED_CTRL_PORT,OLED_WR);
 
-  OLED_DATA_LOW = 255-GraphicsColor.red;
-  OLED_DATA_MED = 255-GraphicsColor.green;
-  OLED_DATA_HIGH = 255-GraphicsColor.blue;
+  OLED_DATA_LOW = GraphicsColor.blue;
+  OLED_DATA_MED = GraphicsColor.green;
+  OLED_DATA_HIGH = GraphicsColor.red;
 
   SETBIT(OLED_CTRL_PORT,OLED_WR);
 //  SETBIT(OLED_CTRL_PORT,OLED_CS);
@@ -180,35 +179,6 @@ hx8347_suspend(void)
 }
 
 static inline void
-hx8347_fill(unsigned long length)
-{
-  SETBIT(LCD_DNC_SCL_PORT, LCD_DNC_SCL_PIN);
-//  CLRBIT(OLED_CTRL_PORT, OLED_CS);
-
-  //*     Set the color once
-  OLED_DATA_LOW = 255 - GraphicsColor.red;
-  OLED_DATA_MED = 255 - GraphicsColor.green;
-  OLED_DATA_HIGH = 255 - GraphicsColor.blue;
-
-  DUFF_DEVICE_8(length,
-    /* toggle the WR pin */
-    asm("ldi r24,0x20               ""\n\t"
-        "sts 0x0109,r24 ""\n\t"
-        "sts 0x0109,r24 ""\n\t"
-        "sts 0x0109,r24 ""\n\t"
-        "sts 0x0109,r24 ""\n\t"
-        "sts 0x0109,r24 ""\n\t"
-        "sts 0x0109,r24 ""\n\t"
-        "sts 0x0109,r24 ""\n\t"
-        "sts 0x0109,r24 ""\n\t"
-        :
-        :
-        : "r24" ););
-
-//  SETBIT(OLED_CTRL_PORT, OLED_CS);
-}
-
-static inline void
 hx8347_set_window(int x_start, int y_start, int x_end, int y_end)
 {
 
@@ -228,6 +198,38 @@ hx8347_set_window(int x_start, int y_start, int x_end, int y_end)
 //  hx8347_com_data (0x0008, y_end >> 8); // Row address end2
   hx8347_com_data (0x0009, y_end); // Row address end1
   hx8347_command (0x0022);
+}
+
+static inline void
+hx8347_fill(unsigned long length)
+{
+  SETBIT(LCD_DNC_SCL_PORT, LCD_DNC_SCL_PIN);
+//  CLRBIT(OLED_CTRL_PORT, OLED_CS);
+
+  //*     Set the color once
+  OLED_DATA_LOW = GraphicsColor.blue;
+  OLED_DATA_MED = GraphicsColor.green;
+  OLED_DATA_HIGH = GraphicsColor.red;
+
+  DUFF_DEVICE_8(length,
+    /* toggle the WR pin */
+    asm("ldi r24,0x20               ""\n\t"
+        "sts 0x0109,r24 ""\n\t"
+        "sts 0x0109,r24 ""\n\t"
+        "sts 0x0109,r24 ""\n\t"
+        "sts 0x0109,r24 ""\n\t"
+        "sts 0x0109,r24 ""\n\t"
+        "sts 0x0109,r24 ""\n\t"
+        "sts 0x0109,r24 ""\n\t"
+        "sts 0x0109,r24 ""\n\t"
+        :
+        :
+        : "r24" ););
+
+//  SETBIT(OLED_CTRL_PORT, OLED_CS);
+
+  /* Assume filling is finished, reset window */
+  hx8347_set_window(0,0,319,239);
 }
 
 static void
@@ -264,19 +266,112 @@ hx8347_setup_pins(void)
   SETBIT(LCD_DNC_SCL_DDR, LCD_DNC_SCL_PIN);
 }
 
+static unsigned char
+hx8347_read_register(unsigned char index)
+{
+  unsigned int val = 0;
+
+  hx8347_command (index);
+
+  OLED_DATA_LOW_DDR = 0x00;
+  OLED_DATA_MED_DDR = 0x00;
+  OLED_DATA_HIGH_DDR = 0x00;
+
+  /* Read pixel */
+  SETBIT(LCD_DNC_SCL_PORT, LCD_DNC_SCL_PIN);
+  CLRBIT(OLED_CTRL_PORT, OLED_RD);
+  SETBIT(OLED_CTRL_PORT, OLED_WR);
+
+  val = (OLED_DATA_LOW >> 2);
+  val |= (OLED_DATA_MED >> 2) << 6;
+
+  SETBIT(OLED_CTRL_PORT, OLED_RD);
+  SETBIT(OLED_CTRL_PORT, OLED_CS);
+
+  /* Output direction */OLED_DATA_LOW_DDR = 0xFF;
+  OLED_DATA_MED_DDR = 0xFF;
+  OLED_DATA_HIGH_DDR = 0xFF;
+
+  return val;
+}
+
 static void
 hx8347_init(void)
 {
+  volatile unsigned char val = 0;
+
+ // usart_init(9600);
   hx8347_setup_pins ();
 
-//      print("hx_init\r\n");
-
+ // usart_puts("hx8347_init\n");
 
   /* Reset OLED */
   CLRBIT(OLED_CTRL_PORT, OLED_RESET);
   delay_ms (200);
   SETBIT(OLED_CTRL_PORT, OLED_RESET);
+  delay_ms (200);
 
+  val = hx8347_read_register(0x00);
+
+  hx8347_com_data(0x18,0x38);
+  hx8347_com_data(0x19,0x01);
+  hx8347_com_data(0x1F,0x88);
+  delay_ms(20);
+  hx8347_com_data(0x1F,0x80);
+  delay_ms(20);
+  hx8347_com_data(0x1F,0x90);
+  delay_ms(20);
+  hx8347_com_data(0x1F,0xD4);
+  delay_ms(20);
+  hx8347_com_data(0x28,0x38);
+  delay_ms(20);
+  hx8347_com_data(0x28,0x3C);
+  delay_ms(20);
+  hx8347_com_data(0x36,0x05);
+  hx8347_com_data(0x17,0x06);
+  hx8347_com_data(0xEB,0x26);
+  hx8347_com_data(0x2F,0x11);
+  hx8347_com_data(0x29,0xFF);
+  hx8347_com_data(0x2B,0x02);
+  hx8347_com_data(0x2C,0x02);
+  hx8347_com_data(0x2D,0x04);
+  hx8347_com_data(0x2E,0x80);
+  hx8347_com_data(0x18,0x36);
+  hx8347_com_data(0x1A,0x03);
+  hx8347_com_data(0x1B,0x29);
+  hx8347_com_data(0xE2,0x04);
+  hx8347_com_data(0xE3,0x04);
+  hx8347_com_data(0x24,0x5D);
+  hx8347_com_data(0x25,0x48);
+  hx8347_com_data(0x23,0x7E);
+  hx8347_com_data(0xE8,0x40);
+  hx8347_com_data(0xEC,0x3C);
+  hx8347_com_data(0xED,0xC4);
+  hx8347_com_data(0xE4,0x03);
+  hx8347_com_data(0xE5,0x13);
+  hx8347_com_data(0xE6,0x13);
+  hx8347_com_data(0xE7,0x03);
+  hx8347_com_data(0xF3,0x00);
+  hx8347_com_data(0xF4,0x00);
+
+  //############# page select ##############
+  hx8347_com_data(0x71,0x00);
+  hx8347_com_data(0x72,0x06);
+  hx8347_com_data(0x73,0x04);
+  hx8347_com_data(0x74,0x02);
+  hx8347_com_data(0x75,0x00);
+  hx8347_com_data(0x76,0x01);
+
+  hx8347_com_data(0x0C,0x40);
+
+  hx8347_com_data(0xFF,0x02);
+  hx8347_com_data(0x0C,0x40);
+  hx8347_com_data(0xFF,0x00);
+
+  hx8347_com_data (0x0016, (5<<5)); // MY=0, MX=0, MV=0, ML=1, BGR=0, TEON=0
+
+
+#if 0
   //hx8347_com_data (0x0016,0x0008 | (5<<5)); // MY=0, MX=0, MV=0, ML=1, BGR=0, TEON=0
 
   // Display Setting
@@ -358,7 +453,7 @@ hx8347_init(void)
   hx8347_com_data (0x004f, 0x004C);
   hx8347_com_data (0x0050, 0x0046);
   hx8347_com_data (0x0051, 0x0044);
-
+#endif
   hx8347_set_window(0,0,319,239);
 
   long len = 320;
