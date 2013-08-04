@@ -359,6 +359,11 @@ oled28_suspend(void)
   oled28_data(0x01);
 }
 
+static int
+oled28_screen_rev(){
+    return 3;
+}
+
 struct display_device oled28_driver = {
       .brightness_max = 5,
 
@@ -376,4 +381,5 @@ struct display_device oled28_driver = {
       .enable = oled28_enable,
       .disable = oled28_disable,
       .fill = oled28_fill,
+      .screen_rev = oled28_screen_rev,
 };

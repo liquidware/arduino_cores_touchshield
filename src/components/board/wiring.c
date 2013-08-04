@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "platform.h"
+#include "display.h"
 
 #define MILLISECOND_CNT_MAX     7       //8*128uS = 1.024 mS
 #define MAX_CALLBACKS           4
@@ -81,7 +82,10 @@ unschedule(void(*func)(void))
 unsigned long
 millis()
 {
-  return millis_var;
+    if (display->screen_rev() == 3)
+        return millis_var;
+    else
+        return millis_var * 2;
 }
 
 void

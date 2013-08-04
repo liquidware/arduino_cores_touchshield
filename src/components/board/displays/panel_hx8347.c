@@ -465,6 +465,11 @@ hx8347_init(void)
   hx8347_fill(len);
 }
 
+static int
+hx8347_screen_rev(){
+    return 0;
+}
+
 struct display_device hx8347_driver = {
       .brightness_max = 5,
 
@@ -482,4 +487,5 @@ struct display_device hx8347_driver = {
       .enable = hx8347_enable,
       .disable = hx8347_disable,
       .fill = hx8347_fill,
+      .screen_rev = hx8347_screen_rev,
 };

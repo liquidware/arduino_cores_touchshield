@@ -52,6 +52,7 @@ struct display_device {
   void          (*resume)(void);
   void          (*suspend)(void);
   void          (*fill)(unsigned long length);
+  int			(*screen_rev)(void);
 
 };
 
