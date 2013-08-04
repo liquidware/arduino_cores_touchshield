@@ -93,4 +93,13 @@ int serialRead()
 	}
 }
 
+int serialPeek()
+{
+    if (rx_buffer_head == rx_buffer_tail) {
+        return -1;
+    } else {
+        return rx_buffer[rx_buffer_tail];
+    }
+}
+
 #endif

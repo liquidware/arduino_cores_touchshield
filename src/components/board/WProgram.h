@@ -15,11 +15,12 @@
 
 #ifdef __cplusplus
 
-
+#if 0
 // random prototypes
 long random(long);
 long random(long, long);
 void randomSeed(unsigned int);
 long map(long, long, long, long, long);
+#endif
 
 #endif

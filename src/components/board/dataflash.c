@@ -61,14 +61,14 @@
 	#include "touchscreen.h"
 #endif
 
+
 unsigned int dataflash_buff_size = 0;	//!< The size of the on-chip buffer
-
-
 
 //*******************************************************************************
 void dataflash_init()
 {
-
+#define DATAFLASH_SPCR_SETTING 0x5C
+    
 	CLRBIT(DATAFLASH_DDR,DATAFLASH_MISO);
 	SETBIT(DATAFLASH_DDR,DATAFLASH_RESET);
 	SETBIT(DATAFLASH_DDR,DATAFLASH_CS);
@@ -85,11 +85,9 @@ void dataflash_init()
 	SETBIT(DATAFLASH_PORT,DATAFLASH_CS); 	//dataflash not selected
 
 	/* Enable SPI, Master, set clock rate fck/16 */
-
 //	SPCR = (1<<SPE) | (1<<MSTR) | (1<< SPR0);
-	SPCR = 0x5C; //SPI mode 3
+	SPCR = DATAFLASH_SPCR_SETTING;
 	SPSR = (1<<SPI2X);
-//	SPCR |= (1<< SPR0);
 }
 
 
@@ -254,7 +252,6 @@ while(block_counter < DATAFLASH_BLOCK_COUNT)
 //*******************************************************************************
 void dataflash_out(unsigned char cData)
 {
-
 	/* Start transmission */
 	SPDR = cData;
 	/* Wait for transmission complete */
@@ -264,7 +261,6 @@ void dataflash_out(unsigned char cData)
 		;
 		}
 #endif
-
 }
 
 

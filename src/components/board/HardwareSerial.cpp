@@ -76,6 +76,10 @@ uint8_t	availableFlag;
 	return(availableFlag);
 }
 
+int HardwareSerial::peek(void)
+{
+	return serialPeek();
+}
 
 //*******************************************************************************
 int HardwareSerial::read(void)
@@ -95,6 +99,7 @@ void HardwareSerial::flush()
 	;
 }
 
+#if 0
 //*******************************************************************************
 void HardwareSerial::print(char c)
 {
@@ -112,10 +117,11 @@ void HardwareSerial::print(const char c[])
 	while (*c)
 		print(*c++);
 }
+#endif
 
 
 //*******************************************************************************
-void HardwareSerial::print(uint8_t b)
+size_t HardwareSerial::write(uint8_t b)
 {
 #if defined(_TOUCH_SLIDE_) || defined(_NEW_SERIAL_)
 	serialWrite(b);
@@ -123,8 +129,10 @@ void HardwareSerial::print(uint8_t b)
 #ifdef _TOUCH_STEALTH_
 	bitbang_putc(b);
 #endif
+	return 1;
 }
 
+#if 0
 //*******************************************************************************
 void HardwareSerial::print(int n)
 {
@@ -257,7 +265,11 @@ void HardwareSerial::printNumber(unsigned long n, uint8_t base)
 		print(out);
 	}
 }
+#endif 
 
+HardwareSerial::operator bool() {
+	return true;
+}
 
 // Preinstantiate Objects //////////////////////////////////////////////////////
 HardwareSerial Serial = HardwareSerial(0);

@@ -35,6 +35,10 @@ PIN_DESC_T const pinTable[] = {
     /* 11 */  { &PORTE, 3, &PINE, &DDRE },
     /* 12 */  { &PORTH, 3, &PINH, &DDRH },
     /* 13 */  { &PORTL, 3, &PINL, &DDRL },
+    /* 14 */  { &PORTB, 0, &PINB, &DDRB }, //Slide SS (unused)
+    /* 15 */  { &PORTB, 2, &PINB, &DDRB }, //Slide MOSI
+    /* 16 */  { &PORTB, 3, &PINB, &DDRB }, //Slide MISO
+    /* 17 */  { &PORTB, 1, &PINB, &DDRB }, //Slide SCK
 };
 
 /*==============================================================================

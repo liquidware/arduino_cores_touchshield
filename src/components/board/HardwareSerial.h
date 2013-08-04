@@ -22,27 +22,36 @@
 
 #include <inttypes.h>
 
-#define DEC 10
-#define HEX 16
-#define OCT 8
-#define BIN 2
-#define BYTE 0
-
+#include "Stream.h"
 
 #ifdef __cplusplus
 
-class HardwareSerial
+struct ring_buffer;
+
+class HardwareSerial : public Stream
 {
 	private:
 		//uint8_t _uart;
-		void printNumber(unsigned long, uint8_t);
+		
 	public:
 		HardwareSerial(uint8_t);
 		void begin(long);
-		//	void end(void);
-		int available(void);
-		int read(void);
-		void flush(void);
+		void begin(unsigned long, uint8_t);
+		void end();
+		virtual int available(void);
+    		virtual int peek(void);
+		virtual int read(void);
+		virtual void flush(void);
+    		virtual size_t write(uint8_t);
+    		inline size_t write(unsigned long n) { return write((uint8_t)n); }
+    		inline size_t write(long n) { return write((uint8_t)n); }
+    		inline size_t write(unsigned int n) { return write((uint8_t)n); }
+    		inline size_t write(int n) { return write((uint8_t)n); }
+		using Print::write; // pull in write(str) and write(buf, size) from Print
+		operator bool();
+
+#if 0
+		void printNumber(unsigned long, uint8_t);
 		void print(char);
 		void print(const char[]);
 		void print(uint8_t);
@@ -61,6 +70,7 @@ class HardwareSerial
 		void println(long);
 		void println(unsigned long);
 		void println(long, int);
+#endif
 };
 
 extern HardwareSerial Serial;

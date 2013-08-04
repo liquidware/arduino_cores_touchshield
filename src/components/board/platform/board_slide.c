@@ -85,6 +85,8 @@ touchshield_get_revision(void)
 void
 slide_init()
 {
+#define NO_DATAFLASH
+
   extern struct display_device hx8347_driver;
   extern struct display_device oled28_driver;
 
@@ -94,10 +96,18 @@ slide_init()
     display = &hx8347_driver;
   display->init ();
 
+  /* set unused SS to output high */
+  digitalWrite(14, HIGH);
+  pinMode(14, OUTPUT);
+  
+#ifndef NO_DATAFLASH 
   dataflash_init ();
+#endif
   touchscreen->init ();
   touchscreen_service_init();
+#ifndef NO_DATAFLASH
   bmp_init ();
+#endif
 }
 
 struct platform_board slide_board = {

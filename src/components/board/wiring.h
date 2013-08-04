@@ -48,6 +48,7 @@
 //#include	"font.h"
 #include        "display.h"
 #include        "platform.h"
+#include    "WString.h"
 
 #define HIGH 0x1
 #define LOW  0x0
@@ -60,6 +61,16 @@
 #define TWO_PI 6.283185
 #define DEG_TO_RAD 0.01745329
 #define RAD_TO_DEG 57.2957786
+
+#define SERIAL  0x0
+#define DISPLAY 0x1
+
+#define LSBFIRST 0
+#define MSBFIRST 1
+
+#define CHANGE 1
+#define FALLING 2
+#define RISING 3
 
 #define clockCyclesPerMicrosecond() ( F_CPU / 1000000L )
 #define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
@@ -84,6 +95,7 @@ void			serialWrite(unsigned char c);
 int				serialAvailable(void);
 int				serialRead(void);
 void			serialFlush(void);
+int			serialPeek();
 void			printMode(int);
 void			printByte(unsigned char c);
 void			printNewline(void);
@@ -112,9 +124,23 @@ void			arduinoRun();   //brings arduino out of reset
 void bitbang_init();
 void bitbang_putc(unsigned char c);
 unsigned char bitbang_receive();
-
+    
 #ifdef __cplusplus
 } // extern "C"
+#endif
+
+#ifdef __cplusplus
+
+#include "WCharacter.h"
+#include "WString.h"
+#include "HardwareSerial.h"
+
+// random prototypes
+long random(long);
+long random(long, long);
+void randomSeed(unsigned int);
+long map(long, long, long, long, long);
+
 #endif
 
 #endif
