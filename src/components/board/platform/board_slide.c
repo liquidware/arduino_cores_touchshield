@@ -85,7 +85,7 @@ touchshield_get_revision(void)
 void
 slide_init()
 {
-#define NO_DATAFLASH
+//#define NO_DATAFLASH //commented out to reactivate imaging @Gionfriddo & Ladden
 
   extern struct display_device hx8347_driver;
   extern struct display_device oled28_driver;
