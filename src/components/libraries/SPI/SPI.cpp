@@ -24,9 +24,9 @@ void SPIClass::begin() {
   pinMode(SS, OUTPUT);
 
     //fosc/128
-    SPCR |= _BV(SPR1);
-    SPCR |= _BV(SPR0);
-    SPSR &= ~_BV(SPI2X);
+    //SPCR |= _BV(SPR1); //removed SPI clock speed divisor @Gionfriddo & Huffsmith
+    //SPCR |= _BV(SPR0); //removed SPI clock speed divisor @Gionfriddo & Huffsmith
+    //SPSR &= ~_BV(SPI2X); //removed SPI clock speed divisor @Gionfriddo & Huffsmith
     
   // Warning: if the SS pin ever becomes a LOW INPUT then SPI
   // automatically switches to Slave, so the data direction of
